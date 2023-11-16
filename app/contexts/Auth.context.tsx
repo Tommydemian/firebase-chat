@@ -15,6 +15,7 @@ type User = {
 
 type AuthContextType = {
     user: User
+    setUser: React.Dispatch<React.SetStateAction<User>>
     handleSignup: (email: string, password: string, navigation?:any, destination?: string) => void;
 }
 
@@ -55,7 +56,7 @@ const handleSignup = (email: string, password: string, navigation?: any, destina
     return () => unsuscribe();
   }, [])
 
- return(<AuthContext.Provider value={{user, handleSignup}}>
+ return(<AuthContext.Provider value={{user, setUser, handleSignup}}>
         {children}
     </AuthContext.Provider>)
 }
