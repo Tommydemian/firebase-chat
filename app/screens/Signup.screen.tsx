@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, StyleSheet, Text, TextInput, View, Pressable } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { MainContainer } from '../components/MainContainer'
 import { InputField } from '../components/InputField'
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
@@ -7,11 +7,11 @@ import {useForm} from 'react-hook-form'
 import { COLORS } from '../../theme';
 import { SubmitButton } from '../components/SubmitButton';
 import Spinner from 'react-native-loading-spinner-overlay';
-import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { auth, firestore } from '../../config/firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 import { collection, doc, setDoc } from 'firebase/firestore';
-import { useFonts } from 'expo-font';
+import { AuthProvider, AuthContext } from '../contexts/Auth.context';
+import { signOut } from 'firebase/auth';
 
 type FormData = {
   email: string;
@@ -20,68 +20,30 @@ type FormData = {
 
 export const Signup = () => {
 
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState({email:'', uid: ''})
+const context = useContext(AuthContext);
 
-  const [fontsLoaded] = useFonts({
-    RobotoBold: require('../../assets/Roboto-Bold.ttf')
-  })
+if (!context) {
+  throw new Error('useContext must be used within a AuthProvider');
+}
+
+const { user, handleSignup } = context;
 
   const navigation = useNavigation()
 
     const {control, handleSubmit, formState: {errors}} = useForm<FormData>()
 
-  //  function handleChange(setter: React.Dispatch<React.SetStateAction<string>>){
-  //   return function (text:string){
-  //       setter(text)
-  //   }
-  //  }
-
   const usersCol = collection(firestore, 'users')
   const usersDoc = doc(usersCol)
 
 
-  const handleSignup = handleSubmit((data) => {
-    setLoading(true)
-    createUserWithEmailAndPassword(auth, data.email, data.password)
-    .then((userCredential) => {
-      // Signed up 
-      const user = userCredential.user;
-      console.log(user, 'user from then');
-      
-      // ...
-      setLoading(false)
-      navigation.navigate('Login')
-      
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error(errorCode);
-      console.error(errorMessage);
-      
-      // ..
-      setLoading(false)
+  const onSubmit = handleSubmit((data) => {
+    handleSignup( data.email, data.password, navigation, 'Login' )
   })
- })
 
-  useEffect(() => {
-    const unsuscribe = onAuthStateChanged(auth, user => {
-      console.log('user', user?.uid);
-      setDoc(usersDoc, {uid: user?.uid, email: user?.email});
-      if (user && user.email) {
-        setUser({email: user?.email, uid: user?.uid})
-      }
-    })
-
-    return () => unsuscribe();
-  }, [])
-
-  
   return (
     <View style={styles.container}>
       <Text style={{fontFamily: 'RobotoBold'}}>whatever</Text>
-      <Spinner visible={loading}/>
+      <Spinner visible={user.loading}/>
       <InputField
       rules={{required: 'Email is required'}}
       name='email' 
@@ -104,8 +66,12 @@ export const Signup = () => {
       rightIcon={<Entypo name="eye" size={24} color={COLORS.richBlack} />}
         />
       
-      <SubmitButton onPress={handleSignup}>
+      <SubmitButton onPress={onSubmit}>
         Sing Up
+      </SubmitButton>
+
+      <SubmitButton onPress={() => signOut(auth)}>
+        sign out
       </SubmitButton>
 
     </View>
