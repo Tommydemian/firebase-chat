@@ -16,22 +16,12 @@ export const Home = () => {
         throw new Error('useContext must be used within a AuthProvider');
       }
 
-      const { user, setUser } = context;
-
-      useEffect(() =>{
-        onAuthStateChanged(auth, firebaseUser => {
-          console.log(firebaseUser);
-          if (firebaseUser == null) {
-            setUser(current => ({...current, isLoggedIn: false}));
-          }          
-        })
-      }, [])
-
+      const { signOutUser } = context;
 
   return (
     <View>
       <Text>Home</Text>
-      <TouchableOpacity onPress={handleSignOut}>
+      <TouchableOpacity onPress={signOutUser}>
         <Text>SignOut</Text>
         </TouchableOpacity>
     </View>

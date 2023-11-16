@@ -42,7 +42,7 @@ const { user, handleSignup } = context;
 
   return (
     <View style={styles.container}>
-      <Text style={{fontFamily: 'RobotoBold'}}>whatever</Text>
+      <Text>whatever</Text>
       <Spinner visible={user.loading}/>
       <InputField
       rules={{required: 'Email is required'}}
