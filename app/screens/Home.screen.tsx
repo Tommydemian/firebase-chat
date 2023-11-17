@@ -1,14 +1,8 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import React, { useContext, useEffect } from 'react'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { auth } from '../../config/firebaseConfig'
+import { Text, View, TouchableOpacity } from 'react-native'
+import React, { useContext } from 'react'
 import { AuthContext } from '../contexts/Auth.context'
 
 export const Home = () => {
-
-  const handleSignOut = () => {
-    signOut(auth)
-  }
 
   const context = useContext(AuthContext)
     

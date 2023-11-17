@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, StyleSheet, Text, TextInput, View, Pressable } from 'react-native'
+import { KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View, Pressable } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { MainContainer } from '../components/MainContainer'
 import { InputField } from '../components/InputField'
@@ -26,7 +26,7 @@ if (!context) {
   throw new Error('useContext must be used within a AuthProvider');
 }
 
-const { user, handleSignup } = context;
+const { user, handleSignup, handleForgotPassword } = context;
 
   const navigation = useNavigation()
 
@@ -70,6 +70,10 @@ const { user, handleSignup } = context;
         Sing Up
       </SubmitButton>
 
+      <TouchableOpacity>
+      <Text onPress={handleForgotPassword} style={styles.forgotPassword}>Forgot your password?</Text>
+      </TouchableOpacity>
+
       <SubmitButton onPress={() => signOut(auth)}>
         sign out
       </SubmitButton>
@@ -83,5 +87,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: '5%', 
     justifyContent: 'center',
+  }, 
+  forgotPassword: {
+    alignSelf: 'flex-end', 
+    color: COLORS.ruddyBlue
   }
 })

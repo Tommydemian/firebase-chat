@@ -1,6 +1,8 @@
-import { Auth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
+import { Auth, createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signOut } from "firebase/auth";
 import React, { createContext, useState, useEffect } from "react";
 import { auth } from "../../config/firebaseConfig";
+import { Alert } from "react-native";
+import { current } from "@reduxjs/toolkit";
 
 type AuthProviderProps = {
     children: React.ReactNode
@@ -18,13 +20,16 @@ type AuthContextType = {
     setUser: React.Dispatch<React.SetStateAction<User>>
     handleSignup: (email: string, password: string, navigation?:any, destination?: string) => void;
     signOutUser: () => void;
+    handleForgotPassword: () => void  
   }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider:React.FC<AuthProviderProps> = ({children}) => {
- const [user, setUser] = useState<User>({email:'', uid: '', isLoggedIn: false, loading: false})
+ // State
+  const [user, setUser] = useState<User>({email:'', uid: '', isLoggedIn: false, loading: false})
 
+  // function Sign in
 const handleSignup = (email: string, password: string, navigation?: any, destination?: string) => {
     setUser(current => ({...current, loading: true}))
     createUserWithEmailAndPassword(auth, email, password)
@@ -48,7 +53,7 @@ const handleSignup = (email: string, password: string, navigation?: any, destina
   })
  }
 
- // handle Signout 
+ // function Signout 
  function signOutUser() {
   signOut(auth)
     .then(() => {
@@ -59,16 +64,62 @@ const handleSignup = (email: string, password: string, navigation?: any, destina
     });
 }
 
- useEffect(() => {
-    const unsuscribe = onAuthStateChanged(auth, user => {
-      console.log('user', user?.uid);
-      setUser(current => ({...current, isLoggedIn: true, email: user?.email || '', loading: false, uid: user?.uid || ''}))
-    })
+// function Recover password
+   const handleForgotPassword = () => {
+    Alert.prompt('Forgot Password?', 'Enter your email address', 
+    [
+      {
+        text: 'Cancel', 
+        style: 'cancel'
+      }, 
+      {
+        text: 'Reset Password', 
+        onPress: ((emailInput) => {
+          setUser(current => ({...current, isLoading: true}))
+          sendPasswordResetEmail(auth, emailInput!)
+          .then(() => {
+            alert('Reset Password email sent successfully')
+          }).catch((error) => {
+            console.log();
+            console.error(error.code);
+            console.error(error.message);
+          }).finally(() => {
+            setUser(current => ({...current, isLoading: false}))
+          })
+        })
+      }
+    ]
+    )
+    }
 
-    return () => unsuscribe();
-  }, [])
+   useEffect(() => {
+  const unsuscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      // Usuario está autenticado
+      setUser(current => ({
+        ...current, 
+        isLoggedIn: true, 
+        email: firebaseUser.email || '', 
+        loading: false, 
+        uid: firebaseUser.uid
+      }));
+    } else {
+      // Usuario no está autenticado
+      setUser(current => ({
+        ...current, 
+        isLoggedIn: false, 
+        email: '', 
+        loading: false, 
+        uid: ''
+      }));
+    }
+  });
 
- return(<AuthContext.Provider value={{user, setUser, handleSignup, signOutUser}}>
+  return () => unsuscribe();
+}, []);
+
+
+ return(<AuthContext.Provider value={{user, setUser, handleSignup, signOutUser, handleForgotPassword}}>
         {children}
     </AuthContext.Provider>)
 }
