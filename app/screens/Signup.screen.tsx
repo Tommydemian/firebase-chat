@@ -32,12 +32,8 @@ const { user, handleSignup, handleForgotPassword } = context;
 
     const {control, handleSubmit, formState: {errors}} = useForm<FormData>()
 
-  const usersCol = collection(firestore, 'users')
-  const usersDoc = doc(usersCol)
-
-
   const onSubmit = handleSubmit((data) => {
-    handleSignup( data.email, data.password, navigation, 'Login' )
+    handleSignup( data.email, data.password, navigation, 'Home' )
   })
 
   return (
@@ -52,11 +48,13 @@ const { user, handleSignup, handleForgotPassword } = context;
       placeholder='JonhDoe@gmail.com'
       secureTextEntry={false}
       autoCapitalize='none'
+      setVisibility={false}
       leftIcon={<MaterialIcons name="email" size={24} color={COLORS.richBlack} />} />
       
       <InputField 
       rules={{required: 'Password is required'}}
       name='password'
+      setVisibility
       control={control}
       label='Password'
       placeholder='●●●●●●●●'

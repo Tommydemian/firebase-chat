@@ -1,8 +1,8 @@
 import { Auth, createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signOut } from "firebase/auth";
-import React, { createContext, useState, useEffect } from "react";
-import { auth } from "../../config/firebaseConfig";
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { auth, firestore } from "../../config/firebaseConfig";
 import { Alert } from "react-native";
-import { current } from "@reduxjs/toolkit";
+import { addDoc, collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
 
 type AuthProviderProps = {
     children: React.ReactNode
@@ -29,13 +29,21 @@ export const AuthProvider:React.FC<AuthProviderProps> = ({children}) => {
  // State
   const [user, setUser] = useState<User>({email:'', uid: '', isLoggedIn: false, loading: false})
 
+  // collection ref
+  const usersCol = collection(firestore, 'users')
+
+
   // function Sign in
 const handleSignup = (email: string, password: string, navigation?: any, destination?: string) => {
     setUser(current => ({...current, loading: true}))
     createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
+    .then((userCredential):void => {
       // Signed up
       console.log(userCredential, 'user from then');
+      // add user to DB
+      // addDoc(usersCol, {email: userCredential.user.email, uid: userCredential.user.uid})
+      const newDoc = doc(firestore, 'users', userCredential.user.uid);
+      setDoc(newDoc, {email: userCredential.user.email, uid: userCredential.user.uid, insertedAt: serverTimestamp()})
 
       if (navigation) {
         navigation.navigate(destination)

@@ -13,19 +13,22 @@ type Props = TextInputProps & {
     autoCapitalize: string;
     control: Control;
     rules: object;
+    setVisibility: boolean;
 }
 
-export const InputField: React.FC<Props> = ({label,name,autoCapitalize, control ,placeholder, secureTextEntry, rules = {}, leftIcon, rightIcon, ...rest }) => {
+export const InputField: React.FC<Props> = ({label, setVisibility, name,autoCapitalize, control ,placeholder, secureTextEntry, rules = {}, leftIcon, rightIcon, ...rest }) => {
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   const handlePasswordVisibiliy = () => {
-    setIsPasswordVisible(current => !current)
+    if (setVisibility) {
+      setIsPasswordVisible(current => !current)
+    }
   }
 
-  useEffect(() => {
-    console.log(isPasswordVisible);
-  }, [isPasswordVisible])
+  // useEffect(() => {
+  //   console.log(isPasswordVisible);
+  // }, [isPasswordVisible])
 
   return (
     <Controller 
